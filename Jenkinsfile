@@ -75,11 +75,11 @@ pipeline {
               stage('Run Docker Container') {
                         steps {
                            sh '''
-                                echo "Starting containers with docker-compose..."
-                                docker-compose down || true   # Stop any previous containers, if exist
-                                docker-compose up -d          # Start in detached mode
-                                docker ps                     # Show running containers
-                            '''
+                               echo "Starting containers with docker compose..."
+                                docker compose down || true
+                             docker compose up -d
+                            docker ps
+                             '''
                       }
                     }
 
