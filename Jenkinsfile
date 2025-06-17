@@ -19,14 +19,16 @@ pipeline {
                 '''
             }
         }
-         stage('Docker Test') {
+         stage('Check Docker') {
             steps {
-                sh 'docker ps'
+                sh '''
+                docker --version
+                docker ps'''
             }
          }  
         stage('Build Docker image') {
             steps {
-                sh ''' 
+               sh '''
                 docker build -t $IMAGE_NAME:$IMAGE_TAG .
                 docker images
                 '''
