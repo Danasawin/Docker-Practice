@@ -50,16 +50,16 @@ pipeline {
 
          stage('Build Docker Images') {
                parallel {
-               //  stage('Build Frontend Docker') {
-        //             steps {
-        //                 dir('frontend') {
-        //                     sh '''
-        //                         docker build -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND .
-        //                         docker images | grep $IMAGE_NAME_FRONTEND
-        //                     '''
-        //                 }
-        //             }
-        //         }
+                stage('Build Frontend Docker') {
+                    steps {
+                        dir('frontend') {
+                            sh '''
+                                docker build -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND .
+                                docker images | grep $IMAGE_NAME_FRONTEND
+                            '''
+                        }
+                    }
+                }
 
                 stage('Build Backend Docker') {
                     steps {
