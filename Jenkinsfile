@@ -19,11 +19,16 @@ pipeline {
                 '''
             }
         }
-        
-        stage('Test') {
+         stage('Docker Test') {
+            steps {
+                sh 'docker ps'
+            }
+         }  
+        stage('Build Docker image') {
             steps {
                 sh ''' 
-                npm run test
+                docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                docker images
                 '''
             }
         }
