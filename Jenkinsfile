@@ -48,9 +48,9 @@ pipeline {
             }
         }
 
-        // stage('Build Docker Images') {
-        //     parallel {
-        //         stage('Build Frontend Docker') {
+         stage('Build Docker Images') {
+               parallel {
+               //  stage('Build Frontend Docker') {
         //             steps {
         //                 dir('frontend') {
         //                     sh '''
@@ -61,17 +61,17 @@ pipeline {
         //             }
         //         }
 
-        //         stage('Build Backend Docker') {
-        //             steps {
-        //                 dir('backend') {
-        //                     sh '''
-        //                         docker build -t $IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND .
-        //                         docker images | grep $IMAGE_NAME_BACKEND
-        //                     '''
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                stage('Build Backend Docker') {
+                    steps {
+                        dir('backend') {
+                            sh '''
+                                docker build -t $IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND .
+                                docker images | grep $IMAGE_NAME_BACKEND
+                            '''
+                        }
+                    }
+                }
+            }
+         }
     }
 }
