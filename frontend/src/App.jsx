@@ -19,7 +19,7 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <h1>Test docker and jenkins in GCPs with docker compose</h1>
-      <h1>TDG</h1>
+      <h1>TDGs</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
