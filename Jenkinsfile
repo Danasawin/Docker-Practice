@@ -48,8 +48,8 @@ pipeline {
             }
         }
 
-         stage('Build Docker Images') {
-               parallel {
+        stage('Build Docker Images') {
+            parallel {
                 stage('Build Frontend Docker') {
                     steps {
                         dir('frontend') {
@@ -71,20 +71,25 @@ pipeline {
                         }
                     }
                 }
-
-              stage('Run Docker Container') {
-                        steps {
-                           sh '''
-                               echo "Starting containers with docker compose..."
-                                docker compose down || true
-                                docker compose build --no-cache
-                             docker compose up -d
-                            docker ps
-                             '''
-                      }
-                    }
-
             }
-         }
+        }
+
+        // ✅ Moved outside of parallel
+        stage('Run Docker Containers') {
+            steps {
+                sh '''
+                    echo "Stopping existing containers..."
+                    docker compose down || true
+
+                    echo "Rebuilding with docker-compose..."
+                    docker compose build --no-cache
+
+                    echo "Starting containers..."
+                    docker compose up -d
+
+                    docker ps
+                '''
+            }
+        }
     }
 }
