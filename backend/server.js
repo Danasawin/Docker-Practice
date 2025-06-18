@@ -4,6 +4,7 @@ const port = 3000; // You can change this port if needed
 import pkg from 'pg';
 const { Pool } = pkg;
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 
@@ -15,6 +16,7 @@ const pool = new Pool({
   password: process.env.DB_PASS,
   port: process.env.DB_PORT,
 });
+console.log('DB_HOST =', process.env.DB_HOST);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
