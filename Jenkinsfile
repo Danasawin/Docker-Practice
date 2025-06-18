@@ -54,7 +54,7 @@ pipeline {
                     steps {
                         dir('frontend') {
                             sh '''
-                                docker build -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND .
+                                docker build --no-cache -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND .
                                 docker images | grep $IMAGE_NAME_FRONTEND
                             '''
                         }
