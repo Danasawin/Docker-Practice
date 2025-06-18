@@ -65,7 +65,7 @@ pipeline {
                     steps {
                         dir('backend') {
                             sh '''
-                                docker build -t $IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND .
+                                docker build --no-cache -t $IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND .
                                 docker images | grep $IMAGE_NAME_BACKEND
                             '''
                         }
