@@ -4,7 +4,8 @@ const port = 3000; // You can change this port if needed
 import pkg from 'pg';
 const { Pool } = pkg;
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: 'docker-prac/.env' });
+
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -13,7 +14,7 @@ const pool = new Pool({
   password: process.env.DB_PASS,
   port: process.env.DB_PORT,
 });
-console.log(pool)
+console.log(user)
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
