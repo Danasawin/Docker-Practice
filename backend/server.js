@@ -1,7 +1,8 @@
 import express from 'express';
 const app = express();
 const port = 3000; // You can change this port if needed
-
+import pkg from 'pg';
+const { Pool } = pkg;
 import dotenv from 'dotenv';
 dotenv.config();
 
