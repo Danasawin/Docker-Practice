@@ -77,6 +77,7 @@ pipeline {
                            sh '''
                                echo "Starting containers with docker compose..."
                                 docker compose down || true
+                                docker compose build --no-cache
                              docker compose up -d
                             docker ps
                              '''
