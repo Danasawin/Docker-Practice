@@ -7,7 +7,7 @@ function App() {
   const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    fetch('http://35.198.234.59/check-db')  // Or use your backend container IP if not on localhost
+    fetch('http://35.198.234.59:3000/check-db')  // Or use your backend container IP if not on localhost
       .then((res) => res.json())
       .then((data) => {
         if (data.name) {
