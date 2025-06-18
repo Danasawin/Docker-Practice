@@ -28,7 +28,7 @@ pipeline {
                         npm ci
                         echo "Building frontend..."
                         npm run build
-                        ls -la
+                        ls -la dist
                     '''
                 }
             }
