@@ -8,10 +8,11 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-     "test": "vitest"
+    "test": "vitest"
   },
   "dependencies": {
     "express": "^5.1.0",
+    "pg": "^8.16.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
