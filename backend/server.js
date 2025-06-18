@@ -23,13 +23,23 @@ app.get('/', (req, res) => {
 
 app.get('/check-db', async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()');
+    const result = await pool.query('SELECT name FROM users LIMIT 1');
+    
+    if (result.rows.length === 0) {
+      return res.json({
+        status: 'success',
+        message: 'No users found',
+      });
+    }
+
+    const userName = result.rows[0].name;
+
     res.json({
       status: 'success',
-      time: result.rows[0].now,
+      message: `Hi, ${userName}!`,
     });
   } catch (err) {
-    console.error('DB connection error:', err); // <- LOG THIS FULLY
+    console.error('DB connection error:', err);
     res.status(500).json({
       status: 'error',
       message: err.message,
