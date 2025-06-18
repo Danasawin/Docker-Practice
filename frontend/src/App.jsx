@@ -1,5 +1,4 @@
 import reactLogo from './assets/react.svg'
-import React from 'react';
 const viteLogo = "/vite.svg";
 import './App.css'
 import React, { useState, useEffect } from 'react';
