@@ -10,13 +10,13 @@ dotenv.config();
 
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASS,
-  port: process.env.DB_PORT,
+  user: 'myuser',
+  host: 'postgres',       // Use 'postgres' if that's the Docker service name
+  database: 'mydb',
+  password: 'mypassword',
+  port: 5432,
 });
-console.log('DB_HOST =', process.env.DB_HOST);
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
