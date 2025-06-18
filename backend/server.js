@@ -34,10 +34,10 @@ app.get('/check-db', async (req, res) => {
 
     const userName = result.rows[0].name;
 
-    res.json({
-      status: 'success',
-      message: `Hi, ${userName}!`,
-    });
+   res.json({
+  status: 'success',
+  name: userName,
+});
   } catch (err) {
     console.error('DB connection error:', err);
     res.status(500).json({
