@@ -4,10 +4,12 @@ const port = 3000; // You can change this port if needed
 import pkg from 'pg';
 const { Pool } = pkg;
 import dotenv from 'dotenv';
-
+import cors from 'cors';
 dotenv.config();
 
-
+app.use(cors({
+  origin: 'http://35.198.234.59:5000'
+}));
 
 const pool = new Pool({
   user: process.env.DB_USER,
