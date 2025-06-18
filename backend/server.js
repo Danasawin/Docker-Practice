@@ -13,7 +13,7 @@ const pool = new Pool({
   password: process.env.DB_PASS,
   port: process.env.DB_PORT,
 });
-
+console.log(pool)
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
