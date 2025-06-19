@@ -25,21 +25,14 @@ app.get('/', (req, res) => {
 
 app.get('/check-db', async (req, res) => {
   try {
-    const result = await pool.query('SELECT name FROM users LIMIT 1');
-    
-    if (result.rows.length === 0) {
-      return res.json({
-        status: 'success',
-        message: 'No users found',
-      });
-    }
+    const result = await pool.query('SELECT NOW()');
+    const currentTime = result.rows[0].now;
 
-    const userName = result.rows[0].name;
-
-   res.json({
-  status: 'success',
-  name: userName,
-});
+    res.json({
+      status: 'success',
+      message: 'Database connection successful',
+      time: currentTime,
+    });
   } catch (err) {
     console.error('DB connection error:', err);
     res.status(500).json({

@@ -2,19 +2,34 @@ import reactLogo from './assets/react.svg'
 const viteLogo = "/vite.svg";
 import './App.css'
 import React, { useState, useEffect } from 'react';
+
 function App() {
-  const [count, setCount] = useState(0)
-  const [userName, setUserName] = useState('');
+  const [count, setCount] = useState(0);
+  const [dbStatus, setDbStatus] = useState(null);
 
   useEffect(() => {
-    fetch('http://35.198.234.59:3000/check-db')  // Or use your backend container IP if not on localhost
+    fetch('http://34.124.185.92:3000/check-db')
       .then((res) => res.json())
       .then((data) => {
-        if (data.name) {
-          setUserName(data.name);
+        if (data.status === 'success') {
+          setDbStatus({
+            message: data.message,
+            time: data.time,
+          });
+        } else {
+          setDbStatus({
+            message: 'Connection failed',
+            time: null,
+          });
         }
       })
-      .catch((err) => console.error('Failed to fetch user:', err));
+      .catch((err) => {
+        console.error('Failed to fetch DB status:', err);
+        setDbStatus({
+          message: 'Connection error',
+          time: null,
+        });
+      });
   }, []);
 
   return (
@@ -28,10 +43,17 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
-      <h1>Test docker and jenkins in GCPs with docker compose3</h1>
-      <h1>TDGs intern</h1>
-      <h1>Postgresql check connection</h1>
-        <h2>{userName ? `Hi, ${userName}!` : 'Loading user...'}</h2>
+      <h1>Test docker and Jenkins in GCP with Docker Compose</h1>
+      <h1>TDG's Intern</h1>
+      <h1>PostgreSQL DB Connection Check</h1>
+
+      {dbStatus && (
+        <div>
+          <p><strong>Status:</strong> {dbStatus.message}</p>
+          {dbStatus.time && <p><strong>DB Time:</strong> {dbStatus.time}</p>}
+        </div>
+      )}
+
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
@@ -44,7 +66,7 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
