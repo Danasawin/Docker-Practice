@@ -5,24 +5,22 @@ pipeline {
         string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Docker image tag to deploy')
     }
 
-
+ 
     stages {
-  
-     stage('GCP AUTH') {
-    steps {
-        withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-            sh '''
-                echo "Authenticating with GCP..."
-                gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                gcloud auth configure-docker ${GAR_REGISTRY}
 
-            '''
+        stage('GCP AUTH') {
+            steps {
+                withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GCLOUD_KEY')]) {
+                    sh '''
+                        echo "Authenticating with GCP..."
+                        gcloud auth activate-service-account --key-file=$GCLOUD_KEY
+                        gcloud auth configure-docker $GAR_REGISTRY
+                    '''
+                }
+            }
         }
-    }
-}
 
-
-    stage('Deploy with Docker Compose') {
+        stage('Deploy with Docker Compose') {
             steps {
                 sh '''
                     echo "IMAGE_TAG=${IMAGE_TAG}" > .env
