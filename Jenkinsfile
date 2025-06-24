@@ -74,20 +74,14 @@ pipeline {
             }
         }
 
-        // ✅ Moved outside of parallel
-        stage('Run Docker Containers') {
+      stage('Push image to GAR') {
             steps {
                 sh '''
-                    echo "Stopping existing containers..."
-                    docker compose down || true
+                echo "Authenticating with GCP..."
+                gcloud auth activate-service-account --key-file=${DOCKER_REG_CRED}
+                gcloud auth configure-docker
 
-                    echo "Rebuilding with docker-compose..."
-                    docker compose build --no-cache
-
-                    echo "Starting containers..."
-                    docker compose up -d
-
-                    docker ps
+              
                 '''
             }
         }
