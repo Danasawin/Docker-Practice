@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_TAG = "latest"
+        GAR_REGISTRY = "asia-southeast1-docker.pkg.dev"
+        GCP_PROJECT = "tdg-sec-non-prod-bnxe"
+        GAR_REPO = "docker-images"
+    }
 
     stages {
 
