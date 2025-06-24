@@ -45,6 +45,7 @@ function App() {
       <h1>Vite + React</h1>
       <h1>Test docker and Jenkins in GCP with Docker Compose</h1>
       <h1>TDG's Intern</h1>
+      <h1>test split pipeline</h1>
       <h1>PostgreSQL DB Connection Check</h1>
 
       {dbStatus && (
