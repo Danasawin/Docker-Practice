@@ -4,8 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME_FRONTEND = "myapp-frontend"
         IMAGE_NAME_BACKEND = "myapp-backend"
-        GIT_HASH = "${env.GIT_COMMIT.take(7)}"
-        IMAGE_TAG = "build-${GIT_HASH}"
+        IMAGE_TAG = "latest"
     }
 
     stages {
