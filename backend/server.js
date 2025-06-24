@@ -8,7 +8,7 @@ import cors from 'cors';
 dotenv.config();
 
 app.use(cors({
-  origin: 'http://35.186.155.160:5000'
+  origin: 'http://35.247.160.122:5000'
 }));
 
 const pool = new Pool({
