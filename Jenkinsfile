@@ -83,8 +83,8 @@ pipeline {
                 gcloud auth configure-docker ${DOCKER_REG_URL}
 
                 echo "Tagging images for GAR..."
-                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
-                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_BACKEND:$IMAGE_TAG
+                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
+                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_BACKEND:$IMAGE_TAG
 
                 echo "Pushing frontend to GAR..."
                 docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
