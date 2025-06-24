@@ -14,7 +14,7 @@ pipeline {
             sh '''
                 echo "Authenticating with GCP..."
                 gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                gcloud auth configure-docker ${DOCKER_REG_URL}
+                gcloud auth configure-docker ${GAR_REGISTRY}
 
             '''
         }
@@ -22,7 +22,7 @@ pipeline {
 }
 
 
-        stage('Deploy with Docker Compose') {
+    stage('Deploy with Docker Compose') {
             steps {
                 sh '''
                     echo "IMAGE_TAG=${IMAGE_TAG}" > .env
