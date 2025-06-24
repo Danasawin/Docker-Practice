@@ -8,6 +8,13 @@ pipeline {
     }
 
     stages {
+        stage('Checkout Code') {
+    steps {
+        cleanWs() // clean the workspace first
+        checkout scm
+         }
+        }
+
 
         stage('Check Node & Docker') {
             steps {
