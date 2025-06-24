@@ -74,16 +74,27 @@ pipeline {
             }
         }
 
-      stage('Push image to GAR') {
-            steps {
-                sh '''
+     stage('Push image to GAR') {
+    steps {
+        withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+            sh '''
                 echo "Authenticating with GCP..."
-                gcloud auth activate-service-account --key-file=${DOCKER_REG_CRED}
-                gcloud auth configure-docker
+                gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                gcloud auth configure-docker asia-southeast1-docker.pkg.dev
 
-              
-                '''
-            }
+                echo "Tagging images for GAR..."
+                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/$IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND
+                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/$IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND
+
+                echo "Pushing frontend to GAR..."
+                docker push asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/$IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND
+
+                echo "Pushing backend to GAR..."
+                docker push asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/$IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND
+            '''
         }
+    }
+}
+
     }
 }
