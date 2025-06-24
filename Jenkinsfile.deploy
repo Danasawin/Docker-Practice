@@ -1,28 +1,43 @@
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Docker image tag to deploy')
+    environment {
+        GAR_REGISTRY = "asia-southeast1-docker.pkg.dev"
+        GCP_PROJECT = "tdg-sec-non-prod-bnxe"
+        GAR_REPO = "docker-images"
     }
-
 
     stages {
 
-        stage('GCP AUTH') {
+        stage('Fetch Last Image Tag') {
+            steps {
+                // Copy the file from build job artifacts
+                copyArtifacts(
+                    projectName: 'Build-Pipeline',
+                    filter: 'latest_tag.txt',
+                    selector: lastSuccessful()
+                )
+                script {
+                    env.IMAGE_TAG = readFile('latest_tag.txt').trim()
+                    echo "Deploying tag: ${env.IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Authenticate to GCP') {
             steps {
                 withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GCLOUD_KEY')]) {
-                    sh """
-                        echo "Authenticating with GCP..."
-                        gcloud auth activate-service-account --key-file="\$GCLOUD_KEY"
-                        gcloud auth configure-docker \$GAR_REGISTRY
-                    """
+                    sh '''
+                        gcloud auth activate-service-account --key-file="$GCLOUD_KEY"
+                        gcloud auth configure-docker $GAR_REGISTRY
+                    '''
                 }
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh """
+                sh '''
                     echo "IMAGE_TAG=${IMAGE_TAG}" > .env
 
                     echo "Creating docker-compose.yml..."
@@ -61,13 +76,13 @@ EOF
                     docker compose down || true
 
                     echo "Pulling new images..."
-                    docker compose pull --ignore-pull-failures
+                    docker compose pull
 
                     echo "Starting containers..."
-                    docker compose up -d --force-recreate --remove-orphans
+                    docker compose up -d
 
                     docker ps
-                """
+                '''
             }
         }
     }
