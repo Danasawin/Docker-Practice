@@ -80,7 +80,7 @@ pipeline {
             sh '''
                 echo "Authenticating with GCP..."
                 gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                gcloud auth configure-docker DOCKER_REG_URL
+                gcloud auth configure-docker ${DOCKER_REG_URL}
 
                 echo "Tagging images for GAR..."
                 docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
