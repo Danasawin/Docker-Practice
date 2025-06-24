@@ -1,0 +1,79 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Docker image tag to deploy')
+    }
+
+    environment {
+        GAR_REGISTRY = "asia-southeast1-docker.pkg.dev"
+        GCP_PROJECT = "tdg-sec-non-prod-bnxe"
+        GAR_REPO = "docker-images"
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('GCP-GAR') // You must configure this secret in Jenkins
+    }
+
+    stages {
+        stage('Authenticate with GCP') {
+            steps {
+                withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh '''
+                        echo "Authenticating with GCP..."
+                        gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                        gcloud auth configure-docker $GAR_REGISTRY
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                sh '''
+                    echo "IMAGE_TAG=${IMAGE_TAG}" > .env
+
+                    echo "Creating docker-compose.yml..."
+                    cat <<EOF > docker-compose.yml
+version: '3.8'
+services:
+  frontend:
+    image: ${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/myapp-frontend:${IMAGE_TAG}
+    ports:
+      - "5000:80"
+    container_name: frontend-container
+
+  backend:
+    image: ${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/myapp-backend:${IMAGE_TAG}
+    ports:
+      - "3000:3000"
+    container_name: backend-container
+
+  database:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+EOF
+
+                    echo "Shutting down old containers..."
+                    docker compose down || true
+
+                    echo "Pulling new images..."
+                    docker compose pull
+
+                    echo "Starting containers..."
+                    docker compose up -d
+
+                    docker ps
+                '''
+            }
+        }
+    }
+}
