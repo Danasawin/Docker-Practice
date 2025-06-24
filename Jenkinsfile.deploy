@@ -61,10 +61,10 @@ EOF
                     docker compose down || true
 
                     echo "Pulling new images..."
-                    docker compose pull
+                    docker compose pull --ignore-pull-failures
 
                     echo "Starting containers..."
-                    docker compose up -d --force-recreate
+                    docker compose up -d --force-recreate --remove-orphans
 
                     docker ps
                 """
