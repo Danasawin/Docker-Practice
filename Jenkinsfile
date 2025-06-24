@@ -3,9 +3,9 @@ pipeline {
 
     environment {
         IMAGE_NAME_FRONTEND = "myapp-frontend"
-        IMAGE_TAG_FRONTEND = "latest"
         IMAGE_NAME_BACKEND = "myapp-backend"
-        IMAGE_TAG_BACKEND = "latest"
+        GIT_HASH = "${env.GIT_COMMIT.take(7)}"
+        IMAGE_TAG = "build-${GIT_HASH}"
     }
 
     stages {
@@ -80,17 +80,17 @@ pipeline {
             sh '''
                 echo "Authenticating with GCP..."
                 gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                gcloud auth configure-docker asia-southeast1-docker.pkg.dev
+                gcloud auth configure-docker DOCKER_REG_URL
 
                 echo "Tagging images for GAR..."
-                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND
-                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/$IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND
+                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
+                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_BACKEND:$IMAGE_TAG
 
                 echo "Pushing frontend to GAR..."
-                docker push asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/$IMAGE_NAME_FRONTEND:$IMAGE_TAG_FRONTEND
+                docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
 
                 echo "Pushing backend to GAR..."
-                docker push asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/$IMAGE_NAME_BACKEND:$IMAGE_TAG_BACKEND
+                docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/$IMAGE_NAME_BACKEND:$IMAGE_TAG
             '''
         }
     }
