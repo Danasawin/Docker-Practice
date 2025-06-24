@@ -5,12 +5,6 @@ pipeline {
         string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Docker image tag to deploy')
     }
 
-    environment {
-        GAR_REGISTRY = "asia-southeast1-docker.pkg.dev"
-        GCP_PROJECT = "tdg-sec-non-prod-bnxe"
-        GAR_REPO = "docker-images"
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('GCP-GAR') // You must configure this secret in Jenkins
-    }
 
     stages {
         stage('Authenticate with GCP') {
