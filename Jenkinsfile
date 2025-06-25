@@ -101,6 +101,22 @@ pipeline {
         }
     }
 }
+    stage('Run Docker Containers') {
+            steps {
+                sh '''
+                    echo "Stopping existing containers..."
+                    docker compose down || true
+
+                    echo "Rebuilding with docker-compose..."
+                    docker compose build --no-cache
+
+                    echo "Starting containers..."
+                    docker compose up -d
+
+                    docker ps
+                '''
+            }
+        }
 
     }
 }
