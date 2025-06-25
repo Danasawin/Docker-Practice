@@ -3,18 +3,19 @@ pipeline {
 
     environment {
         IMAGE_NAME_FRONTEND = "myapp-frontend"
-        IMAGE_NAME_BACKEND = "myapp-backend"
-        IMAGE_TAG = "latest"
+        IMAGE_NAME_BACKEND  = "myapp-backend"
+        IMAGE_TAG           = "${BUILD_NUMBER}" // Unique tag per build
+        LATEST_TAG          = "latest"
     }
 
     stages {
-        stage('Checkout Code') {
-    steps {
-        cleanWs() // clean the workspace first
-        checkout scm
-         }
-        }
 
+        stage('Checkout Code') {
+            steps {
+                cleanWs()
+                checkout scm
+            }
+        }
 
         stage('Check Node & Docker') {
             steps {
@@ -56,23 +57,27 @@ pipeline {
 
         stage('Build Docker Images') {
             parallel {
-                stage('Build Frontend Docker') {
+                stage('Frontend Docker') {
                     steps {
                         dir('frontend') {
                             sh '''
-                                docker build --no-cache -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG .
-                                docker images | grep $IMAGE_NAME_FRONTEND
+                                echo "Building frontend Docker image..."
+                                docker build --no-cache -t ${IMAGE_NAME_FRONTEND}:${IMAGE_TAG} .
+                                docker tag ${IMAGE_NAME_FRONTEND}:${IMAGE_TAG} ${IMAGE_NAME_FRONTEND}:${LATEST_TAG}
+                                docker images | grep ${IMAGE_NAME_FRONTEND}
                             '''
                         }
                     }
                 }
 
-                stage('Build Backend Docker') {
+                stage('Backend Docker') {
                     steps {
                         dir('backend') {
                             sh '''
-                                docker build --no-cache -t $IMAGE_NAME_BACKEND:$IMAGE_TAG .
-                                docker images | grep $IMAGE_NAME_BACKEND
+                                echo "Building backend Docker image..."
+                                docker build --no-cache -t ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} .
+                                docker tag ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} ${IMAGE_NAME_BACKEND}:${LATEST_TAG}
+                                docker images | grep ${IMAGE_NAME_BACKEND}
                             '''
                         }
                     }
@@ -80,27 +85,34 @@ pipeline {
             }
         }
 
-     stage('Push image to GAR') {
-    steps {
-        withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-            sh '''
-                echo "Authenticating with GCP..."
-                gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-                gcloud auth configure-docker ${DOCKER_REG_URL}
+        stage('Push images to GAR') {
+            steps {
+                withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh '''
+                        echo "Authenticating with GCP..."
+                        gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                        gcloud auth configure-docker ${DOCKER_REG_URL}
 
-                echo "Tagging images for GAR..."
-                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_FRONTEND}:${IMAGE_TAG}
-                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_BACKEND}:${IMAGE_TAG}
+                        echo "Tagging images for GAR..."
 
-                echo "Pushing frontend to GAR..."
-                docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_FRONTEND}:${IMAGE_TAG}
+                        # Frontend
+                        docker tag ${IMAGE_NAME_FRONTEND}:${IMAGE_TAG} ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_FRONTEND}:${IMAGE_TAG}
+                        docker tag ${IMAGE_NAME_FRONTEND}:${LATEST_TAG} ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_FRONTEND}:${LATEST_TAG}
 
-                echo "Pushing backend to GAR..."
-                docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_BACKEND}:${IMAGE_TAG}
-            '''
+                        # Backend
+                        docker tag ${IMAGE_NAME_BACKEND}:${IMAGE_TAG} ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_BACKEND}:${IMAGE_TAG}
+                        docker tag ${IMAGE_NAME_BACKEND}:${LATEST_TAG} ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_BACKEND}:${LATEST_TAG}
+
+                        echo "Pushing frontend to GAR..."
+                        docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_FRONTEND}:${IMAGE_TAG}
+                        docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_FRONTEND}:${LATEST_TAG}
+
+                        echo "Pushing backend to GAR..."
+                        docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_BACKEND}:${IMAGE_TAG}
+                        docker push ${DOCKER_REG_URL}/${DOCKER_REG_NAME}/${REG_REPO}/${IMAGE_NAME_BACKEND}:${LATEST_TAG}
+                    '''
+                }
+            }
         }
-    }
-}
-
     }
 }

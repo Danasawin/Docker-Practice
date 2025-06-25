@@ -1,13 +1,11 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_TAG = "latest"
-        GAR_REGISTRY = "asia-southeast1-docker.pkg.dev"
-        GCP_PROJECT = "tdg-sec-non-prod-bnxe"
-        GAR_REPO = "docker-images"
+    parameters {
+        string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Tag of the image to deploy')
     }
 
+  
     stages {
 
         stage('GCP AUTH') {
@@ -29,7 +27,6 @@ pipeline {
 
                     echo "Creating docker-compose.yml..."
                     cat <<EOF > docker-compose.yml
-version: '3.8'
 services:
   frontend:
     image: ${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/myapp-frontend:${IMAGE_TAG}
@@ -59,16 +56,13 @@ volumes:
   pgdata:
 EOF
 
-                    echo "Shutting down old containers..."
+                    echo "Stopping existing containers..."
                     docker compose down || true
 
-                    echo "Pulling new images..."
-                    docker compose pull --ignore-pull-failures
+                    echo "Pulling updated images..."
+                    docker compose pull
 
-                    echo "Rebuilding with docker-compose..."
-                    docker compose build --no-cache
-
-                    echo "Starting containers..."
+                    echo "Launching updated containers..."
                     docker compose up -d --force-recreate --remove-orphans
 
                     docker ps
