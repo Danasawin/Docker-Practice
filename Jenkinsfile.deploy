@@ -1,45 +1,50 @@
 pipeline {
     agent any
-     environment {
+
+    environment {
         IMAGE_NAME_FRONTEND = "myapp-frontend"
         IMAGE_NAME_BACKEND  = "myapp-backend"
-        IMAGE_TAG           = "${parmas.IMAGE_TAG}"           // Jenkins build number
-        LATEST_TAG          = "${params.Push_Tag}"        // parameter from Jenkins UI
-        GAR_REGISTRY      = "${params.DOCKER_REG_URL}"  // parameter from Jenkins UI
-        GCP_PROJECT     = "${params.DOCKER_REG_NAME}" // parameter from Jenkins UI
-        GAR_REPO            = "${params.REG_REPO}"        // parameter from Jenkins UI
+        IMAGE_TAG           = "${params.IMAGE_TAG}"           // tag to deploy (e.g. 24)
+        LATEST_TAG          = "${params.Push_Tag}"            // alias tag (e.g. latest)
+        GAR_REGISTRY        = "${params.DOCKER_REG_URL}"      // e.g. asia-southeast1-docker.pkg.dev
+        GCP_PROJECT         = "${params.DOCKER_REG_NAME}"     // e.g. tdg-sec-non-prod-bnxe
+        GAR_REPO            = "${params.REG_REPO}"            
     }
-  
-    stages {
 
+    stages {
         stage('GCP AUTH') {
             steps {
                 withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GCLOUD_KEY')]) {
-                    sh """
+                    sh '''
                         echo "Authenticating with GCP..."
-                        gcloud auth activate-service-account --key-file="\$GCLOUD_KEY"
+                        gcloud auth activate-service-account --key-file=\$GCLOUD_KEY
                         gcloud auth configure-docker \$GAR_REGISTRY
-                    """
+                    '''
                 }
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
-                sh """
-                    echo "IMAGE_TAG=${IMAGE_TAG}" > .env
+                script {
+                    def frontendImage = "${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/${IMAGE_NAME_FRONTEND}:${IMAGE_TAG}"
+                    def backendImage  = "${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/${IMAGE_NAME_BACKEND}:${IMAGE_TAG}"
 
-                    echo "Creating docker-compose.yml..."
-                    cat <<EOF > docker-compose.yml
+                    sh """
+                        echo "IMAGE_TAG=${IMAGE_TAG}" > .env
+
+                        echo "Creating docker-compose.yml..."
+                        cat <<EOF > docker-compose.yml
+version: '3.8'
 services:
   frontend:
-    image: ${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/myapp-frontend:${IMAGE_TAG}
+    image: ${frontendImage}
     ports:
       - "5000:80"
     container_name: frontend-container
 
   backend:
-    image: ${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/myapp-backend:${IMAGE_TAG}
+    image: ${backendImage}
     ports:
       - "3000:3000"
     container_name: backend-container
@@ -60,17 +65,18 @@ volumes:
   pgdata:
 EOF
 
-                    echo "Stopping existing containers..."
-                    docker compose down || true
+                        echo "Stopping old containers..."
+                        docker compose down || true
 
-                    echo "Pulling updated images..."
-                    docker compose pull
+                        echo "Pulling updated images..."
+                        docker compose pull
 
-                    echo "Launching updated containers..."
-                    docker compose up -d --force-recreate --remove-orphans
+                        echo "Starting new containers..."
+                        docker compose up -d --force-recreate --remove-orphans
 
-                    docker ps
-                """
+                        docker ps
+                    """
+                }
             }
         }
     }
