@@ -115,5 +115,19 @@ pipeline {
                 }
             }
         }
+        stage('Trigger Run Image Container Pipeline') {
+    steps {
+        script {
+            // Use current build number or IMAGE_TAG as tag
+            def tagToPass = env.BUILD_NUMBER
+
+            // Trigger the downstream pipeline, passing IMAGE_TAG parameter
+            build job: 'Run Image Container', parameters: [
+                string(name: 'IMAGE_TAG', value: tagToPass)
+            ]
+        }
+    }
+}
+
     }
 }
