@@ -27,19 +27,19 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 sh """
-                    echo "IMAGE_TAG= ${IMAGE_TAG}" > .env
+                    echo "IMAGE_TAG= $IMAGE_TAG" > .env
 
                     echo "Creating docker-compose.yml..."
                     cat <<EOF > docker-compose.yml
 services:
   frontend:
-    image: ${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/myapp-frontend:${IMAGE_TAG}
+    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/myapp-frontend:$IMAGE_TAG
     ports:
       - "5000:80"
     container_name: frontend-container
 
   backend:
-    image: ${GAR_REGISTRY}/${GCP_PROJECT}/${GAR_REPO}/myapp-backend:${IMAGE_TAG}
+    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/myapp-backend:$IMAGE_TAG
     ports:
       - "3000:3000"
     container_name: backend-container
