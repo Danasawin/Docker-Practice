@@ -64,7 +64,7 @@ pipeline {
                             sh '''
                                 echo "Building frontend Docker image..."
                                 docker build --no-cache -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG .
-                                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG $IMAGE_NAME_FRONTEND:$LATEST_TAG
+                                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG 
                                 docker images | grep $IMAGE_NAME_FRONTEND
                             '''
                         }
@@ -77,7 +77,7 @@ pipeline {
                             sh '''
                                 echo "Building backend Docker image..."
                                 docker build --no-cache -t $IMAGE_NAME_BACKEND:$IMAGE_TAG .
-                                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG $IMAGE_NAME_BACKEND:$LATEST_TAG
+                                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG 
                                 docker images | grep $IMAGE_NAME_BACKEND
                             '''
                         }
@@ -124,6 +124,25 @@ pipeline {
         }
     }
 }
+        stage('Delete Docker images in Local') {
+    steps {
+        sh '''
+            echo "Cleaning up Docker images..."
+
+            # Remove frontend image by tag
+            docker rmi $IMAGE_NAME_FRONTEND:$IMAGE_TAG || true
+            docker rmi $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG || true
+
+            # Remove backend image by tag
+            docker rmi $IMAGE_NAME_BACKEND:$IMAGE_TAG || true
+            docker rmi $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG || true
+
+            # Optional: remove dangling images
+            docker image prune -f
+        '''
+    }
+}
+
 
     }
 }
