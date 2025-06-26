@@ -91,6 +91,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh '''
                         echo "Authenticating with GCP..."
+                        ls -l $GOOGLE_APPLICATION_CREDENTIALS
                         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
                         gcloud auth configure-docker $DOCKER_REG_URL
 
