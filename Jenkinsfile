@@ -98,19 +98,15 @@ pipeline {
 
                         # Frontend
                         docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
-                        docker tag $IMAGE_NAME_FRONTEND:$LATEST_TAG $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_FRONTEND:$LATEST_TAG
 
                         # Backend
                         docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG
-                        docker tag $IMAGE_NAME_BACKEND:$LATEST_TAG $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$LATEST_TAG
 
                         echo "Pushing frontend to GAR..."
                         docker push $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
-                        docker push $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_FRONTEND:$LATEST_TAG
 
                         echo "Pushing backend to GAR..."
                         docker push $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG
-                        docker push $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$LATEST_TAG
                     '''
                 }
             }
