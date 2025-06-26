@@ -25,13 +25,13 @@ app.get('/', (req, res) => {
 
 app.get('/check-db', async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()');
-    const currentTime = result.rows[0].now;
+    const result = await pool.query('SELECT * FROM users');
+    const userName = result.rows[0].now;
 
     res.json({
       status: 'success',
       message: 'Database connection successful',
-      time: currentTime,
+      userName: userName,
     });
   } catch (err) {
     console.error('DB connection error:', err);

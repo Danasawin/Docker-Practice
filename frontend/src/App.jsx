@@ -14,12 +14,12 @@ function App() {
         if (data.status === 'success') {
           setDbStatus({
             message: data.message,
-            time: data.time,
+            userName: data.userName,
           });
         } else {
           setDbStatus({
             message: 'Connection failed',
-            time: null,
+            userName: null,
           });
         }
       })
@@ -27,7 +27,7 @@ function App() {
         console.error('Failed to fetch DB status:', err);
         setDbStatus({
           message: 'Connection error',
-          time: null,
+          userName: null,
         });
       });
   }, []);
@@ -51,7 +51,7 @@ function App() {
       {dbStatus && (
         <div>
           <p><strong>Status:</strong> {dbStatus.message}</p>
-          {dbStatus.time && <p><strong>DB Time:</strong> {dbStatus.time}</p>}
+          {dbStatus.userName && <p><strong>DB Time:</strong> {dbStatus.userName}</p>}
         </div>
       )}
 
