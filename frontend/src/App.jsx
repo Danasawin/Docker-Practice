@@ -14,12 +14,12 @@ function App() {
         if (data.status === 'success') {
           setDbStatus({
             message: data.message,
-            userName: data.userName,
+            data: data.data,
           });
         } else {
           setDbStatus({
             message: 'Connection failed',
-            userName: null,
+            data: null,
           });
         }
       })
@@ -27,7 +27,7 @@ function App() {
         console.error('Failed to fetch DB status:', err);
         setDbStatus({
           message: 'Connection error',
-          userName: null,
+          data: null,
         });
       });
   }, []);
@@ -48,11 +48,20 @@ function App() {
       <h1>test split pipeline TDG</h1>
       <h1>PostgreSQL DB Connection Check</h1>
 
-      {dbStatus && (
-        <div>
+          {dbStatus ? (
+        <div style={{ background: "#eee", padding: "1rem", borderRadius: "8px" }}>
           <p><strong>Status:</strong> {dbStatus.message}</p>
-          {dbStatus.userName && <p><strong>DB Time:</strong> {dbStatus.userName}</p>}
+          {dbStatus.data ? (
+            <div>
+              <strong>DB Result:</strong>
+              <pre>{JSON.stringify(dbStatus.data, null, 2)}</pre>
+            </div>
+          ) : (
+            <p style={{ color: 'red' }}>No DB data found or connection failed.</p>
+          )}
         </div>
+      ) : (
+        <p>Checking DB connection...</p>
       )}
 
       <div className="card">
