@@ -64,7 +64,7 @@ pipeline {
                             sh '''
                                 echo "Building frontend Docker image..."
                                 docker build --no-cache -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG .
-                                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG 
+                                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG $IMAGE_NAME_FRONTEND:$IMAGE_TAG
                                 docker images | grep $IMAGE_NAME_FRONTEND
                             '''
                         }
@@ -77,7 +77,7 @@ pipeline {
                             sh '''
                                 echo "Building backend Docker image..."
                                 docker build --no-cache -t $IMAGE_NAME_BACKEND:$IMAGE_TAG .
-                                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG 
+                                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG $IMAGE_NAME_BACKEND:$IMAGE_TAG
                                 docker images | grep $IMAGE_NAME_BACKEND
                             '''
                         }
@@ -124,7 +124,7 @@ pipeline {
         }
     }
 }
-        stage('Delete Docker images in Local') {
+        stage('Clean up Docker images in local') {
     steps {
         sh '''
             echo "Cleaning up Docker images..."
