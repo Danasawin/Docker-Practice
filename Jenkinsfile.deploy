@@ -34,13 +34,13 @@ pipeline {
                  
 services:
   frontend:
-    image: asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/myapp-frontend:35
+    image: asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/docker-images/myapp-frontend:$IMAGE_TAG
     ports:
       - "5000:80"
     container_name: frontend-container
 
   backend:
-    image: asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/myapp-backend:35
+    image: asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/docker-images/myapp-backend:$IMAGE_TAG
     ports:
       - "3000:3000"
     container_name: backend-container
