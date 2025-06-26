@@ -48,21 +48,31 @@ function App() {
       <h1>test split pipeline TDG</h1>
       <h1>PostgreSQL DB Connection Check</h1>
 
-          {dbStatus ? (
-        <div style={{ background: "#eee", padding: "1rem", borderRadius: "8px" }}>
-          <p><strong>Status:</strong> {dbStatus.message}</p>
-          {dbStatus.data ? (
-            <div>
-              <strong>DB Result:</strong>
-              <pre>{JSON.stringify(dbStatus.data, null, 2)}</pre>
-            </div>
-          ) : (
-            <p style={{ color: 'red' }}>No DB data found or connection failed.</p>
-          )}
-        </div>
-      ) : (
-        <p>Checking DB connection...</p>
-      )}
+         {dbStatus ? (
+  <div>
+    <p><strong>Status:</strong> {dbStatus.message}</p>
+    {dbStatus.data && dbStatus.data.length > 0 ? (
+      <div>
+        <strong>DB Result:</strong>
+        <ul>
+          {dbStatus.data.map((row, index) => (
+            <li key={index}>
+              {Object.entries(row).map(([key, value]) => (
+                <p key={key}><strong>{key}:</strong> {value}</p>
+              ))}
+              <hr />
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : (
+      <p style={{ color: 'red' }}>No DB data found or connection failed.</p>
+    )}
+  </div>
+) : (
+  <p>Checking DB connection...</p>
+)}
+
 
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
