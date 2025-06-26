@@ -41,6 +41,7 @@ services:
 
   backend:
     image: asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/myapp-backend:35
+    ports:
       - "3000:3000"
     container_name: backend-container
 
