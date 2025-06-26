@@ -3,7 +3,7 @@ pipeline {
      environment {
         IMAGE_NAME_FRONTEND = "${params.IMAGE_NAME_FRONTEND}"
         IMAGE_NAME_BACKEND  = "${params.IMAGE_NAME_BACKEND}"
-        IMAGE_TAG           = "${params.IMAGE_TAG}"           // Jenkins build number
+        IMAGE_TAG           = "35"           // Jenkins build number
         LATEST_TAG          = "${params.LATEST_TAG}"        // parameter from Jenkins UI
         GAR_REGISTRY      = "${params.GAR_REGISTRY}"  // parameter from Jenkins UI
         GCP_PROJECT     = "${params.GCP_PROJECT}" // parameter from Jenkins UI
