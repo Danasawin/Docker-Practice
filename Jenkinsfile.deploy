@@ -34,14 +34,13 @@ pipeline {
                  
 services:
   frontend:
-    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
+    image: asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/myapp-frontend:35
     ports:
       - "5000:80"
     container_name: frontend-container
 
   backend:
-    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG
-    ports:
+    image: asia-southeast1-docker.pkg.dev/tdg-sec-non-prod-bnxe/docker-images/myapp-backend:35
       - "3000:3000"
     container_name: backend-container
 
