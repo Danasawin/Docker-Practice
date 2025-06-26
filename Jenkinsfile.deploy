@@ -31,8 +31,7 @@ pipeline {
 
                     echo "Creating docker-compose.yml..."
                     cat <<EOF > docker-compose.yml
-                    echo "Image to pull: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG"
-                    echo "Image to pull: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG"
+                 
 services:
   frontend:
     image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
