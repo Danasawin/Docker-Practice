@@ -1,13 +1,13 @@
 pipeline {
     agent any
      environment {
-        IMAGE_NAME_FRONTEND = "myapp-frontend"
-        IMAGE_NAME_BACKEND  = "myapp-backend"
+        IMAGE_NAME_FRONTEND = "${params.IMAGE_NAME_FRONTEND}"
+        IMAGE_NAME_BACKEND  = "${params.IMAGE_NAME_BACKEND}"
         IMAGE_TAG           = "${params.IMAGE_TAG}"           // Jenkins build number
         LATEST_TAG          = "${params.Push_Tag}"        // parameter from Jenkins UI
-        GAR_REGISTRY      = "${params.DOCKER_REG_URL}"  // parameter from Jenkins UI
-        GCP_PROJECT     = "${params.DOCKER_REG_NAME}" // parameter from Jenkins UI
-        GAR_REPO            = "${params.REG_REPO}"        // parameter from Jenkins UI
+        GAR_REGISTRY      = "${params.GAR_REGISTRY}"  // parameter from Jenkins UI
+        GCP_PROJECT     = "${params.GCP_PROJECT}" // parameter from Jenkins UI
+        GAR_REPO            = "${params.GAR_REPO}"        // parameter from Jenkins UI
     }
   
     stages {
@@ -33,13 +33,13 @@ pipeline {
                     cat <<EOF > docker-compose.yml
 services:
   frontend:
-    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/myapp-frontend:$IMAGE_TAG
+    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
     ports:
       - "5000:80"
     container_name: frontend-container
 
   backend:
-    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/myapp-backend:$IMAGE_TAG
+    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG
     ports:
       - "3000:3000"
     container_name: backend-container
