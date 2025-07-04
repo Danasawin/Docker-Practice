@@ -9,7 +9,7 @@ const app = express();
 const port = 3000;
 
 app.use(cors({
-  origin: 'http://10.241.0.246:5000' // Adjust based on your frontend
+  origin: 'http://35.247.160.122:5000' // Adjust based on your frontend
 }));
 
 // ✅ Set up PostgreSQL pool

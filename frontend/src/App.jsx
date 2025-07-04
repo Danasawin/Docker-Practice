@@ -8,7 +8,7 @@ function App() {
   const [dbStatus, setDbStatus] = useState(null);
 
   useEffect(() => {
-    fetch('http://10.241.0.246:3000/check-db')
+    fetch('http://35.247.160.122:3000/check-db')
       .then((res) => res.json())
       .then((data) => {
         if (data.status === 'success') {
