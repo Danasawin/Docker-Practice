@@ -79,10 +79,15 @@ pipeline {
             }
             steps {
                 script {
-                    def tagToPass = env.BUILD_NUMBER
-                    build job: 'Deploy Pipeline', parameters: [
+                    
+                      def tagToPass = env.BUILD_NUMBER
+                      def imageNameFrontend = "${IMAGE_NAME_FRONTEND}"
+                      def DOCKER_REG_URL = "${params.DOCKER_REG_URL}"
+                      def DOCKER_REG_NAME = "${params.DOCKER_REG_NAME}"
+                      def REG_REPO = "${params.REG_REPO}"
+                    build job: 'Deploy-Frontend-Pipeline', parameters: [
                         string(name: 'IMAGE_TAG', value: tagToPass),
-                        string(name: 'IMAGE_NAME_BACKEND', value: "${params.IMAGE_NAME_BACKEND}"),
+                        string(name: 'IMAGE_NAME_FRONTEND', value: imageNameFrontend),
                         string(name: 'DOCKER_REG_URL', value: "${params.DOCKER_REG_URL}"),
                         string(name: 'DOCKER_REG_NAME', value: "${params.DOCKER_REG_NAME}"),
                         string(name: 'REG_REPO', value: "${params.REG_REPO}")

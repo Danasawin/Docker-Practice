@@ -54,6 +54,9 @@ pipeline {
         }
 
         stage('Push Image to GAR') {
+            when {
+                expression { return params.PushToGar == true }
+            }
             steps {
                 withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh '''
@@ -69,16 +72,30 @@ pipeline {
             }
         }
 
-        stage('Trigger Run Image Container Pipeline') {
-            steps {
-                script {
-                    def tagToPass = env.BUILD_NUMBER
-                    build job: 'Run Image Container', parameters: [
-                        string(name: 'IMAGE_TAG', value: tagToPass)
-                    ]
-                }
+       stage('Trigger Run Image Container Pipeline') {
+          when {
+                expression { return params.TriggerRunContainer == true }
             }
+    steps {
+        script {
+            // Use current build number or IMAGE_TAG as tag
+            def tagToPass = env.BUILD_NUMBER
+            def imageNameBackend = "${IMAGE_NAME_BACKEND}"
+            def DOCKER_REG_URL = "${params.DOCKER_REG_URL}"
+            def DOCKER_REG_NAME = "${params.DOCKER_REG_NAME}"
+            def REG_REPO = "${params.REG_REPO}"
+
+            // Trigger the downstream pipeline, passing IMAGE_TAG parameter
+            build job: 'Deploy-Backend-Pipeline', parameters: [
+                string(name: 'IMAGE_TAG', value: tagToPass),
+                string(name: 'IMAGE_NAME_BACKEND', value: imageNameBackend),
+                string(name: 'DOCKER_REG_URL', value: DOCKER_REG_URL),
+                string(name: 'DOCKER_REG_NAME', value: DOCKER_REG_NAME),
+                string(name: 'REG_REPO', value: REG_REPO)
+            ]
         }
+    }
+}
 
         stage('Clean up Docker Images Locally') {
             steps {
