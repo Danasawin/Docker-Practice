@@ -1,0 +1,115 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME_FRONTEND = "${params.IMAGE_NAME_FRONTEND}"
+        IMAGE_NAME_BACKEND  = "${params.IMAGE_NAME_BACKEND}"
+        IMAGE_TAG           = "${BUILD_NUMBER}"           // Jenkins build number
+        DOCKER_REG_URL      = "${params.DOCKER_REG_URL}"  // parameter from Jenkins UI
+        DOCKER_REG_NAME     = "${params.DOCKER_REG_NAME}" // parameter from Jenkins UI
+        REG_REPO            = "${params.REG_REPO}"        // parameter from Jenkins UI
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                cleanWs()
+                checkout scm
+            }
+        }
+
+        stage('Check Node & Docker') {
+            steps {
+                sh '''
+                    which node && node -v && npm -v
+                    docker --version
+                    docker ps
+                '''
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    sh '''
+                        echo "Installing frontend dependencies..."
+                        npm ci
+                        echo "Building frontend..."
+                        npm run build
+                        ls -la
+                    '''
+                }
+            }
+        }
+
+
+        stage('Build Docker Images') {
+                stage('Frontend Docker') {
+                    steps {
+                        dir('frontend') {
+                            sh '''
+                                echo "Building frontend Docker image..."
+                                docker build --no-cache -t $IMAGE_NAME_FRONTEND:$IMAGE_TAG .
+                                docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG $IMAGE_NAME_FRONTEND:$IMAGE_TAG
+                                docker images | grep $IMAGE_NAME_FRONTEND
+                            '''
+                        }
+                    }
+                }
+            
+        }
+
+        stage('Push images to GAR') {
+            steps {
+                withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh '''
+                        echo "Authenticating with GCP..."
+                        ls -l $GOOGLE_APPLICATION_CREDENTIALS
+                        gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+                        gcloud auth configure-docker $DOCKER_REG_URL
+
+                        echo "Tagging images for GAR..."
+
+                        # Frontend
+                        docker tag $IMAGE_NAME_FRONTEND:$IMAGE_TAG $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
+
+                        echo "Pushing frontend to GAR..."
+                        docker push $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
+
+                
+                    '''
+                }
+            }
+        }
+        stage('Trigger Run Image Container Pipeline') {
+    steps {
+        script {
+            // Use current build number or IMAGE_TAG as tag
+            def tagToPass = env.BUILD_NUMBER
+
+            // Trigger the downstream pipeline, passing IMAGE_TAG parameter
+            build job: 'Run Image Container', parameters: [
+                string(name: 'IMAGE_TAG', value: tagToPass)
+            ]
+        }
+    }
+}
+        stage('Clean up Docker images in local') {
+    steps {
+        sh '''
+            echo "Cleaning up Docker images..."
+
+            # Remove frontend image by tag
+            docker rmi $IMAGE_NAME_FRONTEND:$IMAGE_TAG || true
+            docker rmi $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG || true
+
+
+            # Optional: remove dangling images
+            docker image prune -f
+        '''
+    }
+}
+
+
+    }
+}
