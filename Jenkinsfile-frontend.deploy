@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+     environment {
+        IMAGE_NAME_FRONTEND = "${params.IMAGE_NAME_FRONTEND}"
+        IMAGE_NAME_BACKEND  = "${params.IMAGE_NAME_BACKEND}"
+        IMAGE_TAG           = "${params.IMAGE_TAG}"           // Jenkins build number
+        GAR_REGISTRY      = "${params.GAR_REGISTRY}"  // parameter from Jenkins UI
+        GCP_PROJECT     = "${params.GCP_PROJECT}" // parameter from Jenkins UI
+        GAR_REPO            = "${params.GAR_REPO}"        // parameter from Jenkins UI
+    }
+  
+    stages {
+
+        stage('GCP AUTH') {
+            steps {
+                withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GCLOUD_KEY')]) {
+                    sh """
+                        echo "Authenticating with GCP..."
+                        gcloud auth activate-service-account --key-file="$GCLOUD_KEY"
+                        gcloud auth configure-docker $GAR_REGISTRY
+                    """
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                sh """
+                    echo "IMAGE_TAG= $IMAGE_TAG" > .env
+
+                    echo "Creating docker-compose.yml..."
+                    cat <<EOF > docker-compose.yml
+                 
+services:
+  frontend:
+    image: $GAR_REGISTRY/$GCP_PROJECT/$GAR_REPO/$IMAGE_NAME_FRONTEND:$IMAGE_TAG
+    ports:
+      - "5000:80"
+    container_name: frontend-container
+    
+EOF
+
+                    echo "Stopping existing containers..."
+                    docker compose down || true
+
+                    echo "Pulling updated images..."
+                    docker compose pull
+
+                    echo "Launching updated containers..."
+                    docker compose up -d --force-recreate --remove-orphans
+
+                    docker ps
+                """
+            }
+        }
+    }
+}
