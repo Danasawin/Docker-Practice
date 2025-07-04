@@ -4,9 +4,9 @@ pipeline {
         IMAGE_NAME_FRONTEND = "${params.IMAGE_NAME_FRONTEND}"
         IMAGE_NAME_BACKEND  = "${params.IMAGE_NAME_BACKEND}"
         IMAGE_TAG           = "${params.IMAGE_TAG}"           // Jenkins build number
-        GAR_REGISTRY      = "${params.GAR_REGISTRY}"  // parameter from Jenkins UI
-        GCP_PROJECT     = "${params.GCP_PROJECT}" // parameter from Jenkins UI
-        GAR_REPO            = "${params.GAR_REPO}"        // parameter from Jenkins UI
+        GAR_REGISTRY      = "${params.DOCKER_REG_URL}"  // parameter from Jenkins UI
+        GCP_PROJECT     = "${params.DOCKER_REG_NAME}" // parameter from Jenkins UI
+        GAR_REPO            = "${params.REG_REPO}"        // parameter from Jenkins UI
     }
   
     stages {
