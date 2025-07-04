@@ -75,7 +75,7 @@ pipeline {
 
         stage('Trigger Run Image Container Pipeline') {
             when {
-                expression { return params.TriggerRunContainer == true }
+                expression { return params.Trigger Run Container == true }
             }
             steps {
                 script {
