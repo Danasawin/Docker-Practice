@@ -2,13 +2,12 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME_FRONTEND = "${params.IMAGE_NAME_FRONTEND}"
+        IMAGE_NAME_FRONTEND = "${params.IMAGE_NAME_FRONTEND}" // Not used here
         IMAGE_NAME_BACKEND  = "${params.IMAGE_NAME_BACKEND}"
-        IMAGE_TAG           = "${BUILD_NUMBER}"           // Jenkins build number
-        LATEST_TAG          = "${params.Push_Tag}"        // parameter from Jenkins UI
-        DOCKER_REG_URL      = "${params.DOCKER_REG_URL}"  // parameter from Jenkins UI
-        DOCKER_REG_NAME     = "${params.DOCKER_REG_NAME}" // parameter from Jenkins UI
-        REG_REPO            = "${params.REG_REPO}"        // parameter from Jenkins UI
+        IMAGE_TAG           = "${BUILD_NUMBER}"                 // Jenkins build number
+        DOCKER_REG_URL      = "${params.DOCKER_REG_URL}"        // e.g. asia-southeast1-docker.pkg.dev
+        DOCKER_REG_NAME     = "${params.DOCKER_REG_NAME}"       // e.g. tdg-sec-non-prod-bnxe
+        REG_REPO            = "${params.REG_REPO}"              // e.g. docker-images
     }
 
     stages {
@@ -42,71 +41,56 @@ pipeline {
             }
         }
 
-        stage('Build Docker Images') {
-              
-                 stage('Backend Docker') {
-                    steps {
-                        dir('backend') {
-                            sh '''
-                                echo "Building backend Docker image..."
-                                docker build --no-cache -t $IMAGE_NAME_BACKEND:$IMAGE_TAG .
-                                docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG $IMAGE_NAME_BACKEND:$IMAGE_TAG
-                                docker images | grep $IMAGE_NAME_BACKEND
-                            '''
-                        }
-                    }
+        stage('Build Docker Image') {
+            steps {
+                dir('backend') {
+                    sh '''
+                        echo "Building backend Docker image..."
+                        docker build --no-cache -t $IMAGE_NAME_BACKEND:$IMAGE_TAG .
+                        docker images | grep $IMAGE_NAME_BACKEND
+                    '''
                 }
-            
+            }
         }
 
-        stage('Push images to GAR') {
+        stage('Push Image to GAR') {
             steps {
                 withCredentials([file(credentialsId: 'GCP-GAR', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     sh '''
                         echo "Authenticating with GCP..."
-                        ls -l $GOOGLE_APPLICATION_CREDENTIALS
                         gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
                         gcloud auth configure-docker $DOCKER_REG_URL
 
-                        echo "Tagging images for GAR..."
-
-                        # Backend
+                        echo "Tagging and pushing backend image to GAR..."
                         docker tag $IMAGE_NAME_BACKEND:$IMAGE_TAG $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG
-
-                        echo "Pushing backend to GAR..."
                         docker push $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG
                     '''
                 }
             }
         }
+
         stage('Trigger Run Image Container Pipeline') {
-    steps {
-        script {
-            // Use current build number or IMAGE_TAG as tag
-            def tagToPass = env.BUILD_NUMBER
-
-            // Trigger the downstream pipeline, passing IMAGE_TAG parameter
-            build job: 'Run Image Container', parameters: [
-                string(name: 'IMAGE_TAG', value: tagToPass)
-            ]
+            steps {
+                script {
+                    def tagToPass = env.BUILD_NUMBER
+                    build job: 'Run Image Container', parameters: [
+                        string(name: 'IMAGE_TAG', value: tagToPass)
+                    ]
+                }
+            }
         }
-    }
-}
-        stage('Clean up Docker images in local') {
-    steps {
-        sh '''
-            echo "Cleaning up Docker images..."
 
-             # Remove backend image by tag
-            docker rmi $IMAGE_NAME_BACKEND:$IMAGE_TAG || true
-            docker rmi $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG || true
+        stage('Clean up Docker Images Locally') {
+            steps {
+                sh '''
+                    echo "Cleaning up Docker images..."
 
-            # Optional: remove dangling images
-            docker image prune -f
-        '''
-    }
-}
+                    docker rmi $IMAGE_NAME_BACKEND:$IMAGE_TAG || true
+                    docker rmi $DOCKER_REG_URL/$DOCKER_REG_NAME/$REG_REPO/$IMAGE_NAME_BACKEND:$IMAGE_TAG || true
 
-
+                    docker image prune -f
+                '''
+            }
+        }
     }
 }
